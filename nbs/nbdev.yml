@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "pseudometer"
+  site-url: "https://sbavery.github.io/pseudometer"
+  description: "Pseudoscience detector using machine learning"
+  repo-branch: main
+  repo-url: "https://github.com/sbavery/pseudometer"
