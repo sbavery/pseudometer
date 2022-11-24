@@ -17,8 +17,8 @@ class Webpage:
         self.links = []
         self.text = []
 
-    def get_html(self):
-        page = requests.get(self.url)
+    def get_html(self, timeout = 5):
+        page = requests.get(self.url, timeout=timeout)
         self.html = BeautifulSoup(page.content, "html.parser")
 
     def get_html_anchors(self, keyword="http"):
