@@ -9,9 +9,11 @@ d = { 'settings': { 'branch': 'main',
                                   'pseudometer.core.say_hello': ('core.html#say_hello', 'pseudometer/core.py')},
             'pseudometer.data': { 'pseudometer.data.Webpage': ('data.html#webpage', 'pseudometer/data.py'),
                                   'pseudometer.data.Webpage.__init__': ('data.html#webpage.__init__', 'pseudometer/data.py'),
+                                  'pseudometer.data.Webpage.clean_text': ('data.html#webpage.clean_text', 'pseudometer/data.py'),
                                   'pseudometer.data.Webpage.get_html': ('data.html#webpage.get_html', 'pseudometer/data.py'),
                                   'pseudometer.data.Webpage.get_html_anchors': ( 'data.html#webpage.get_html_anchors',
                                                                                  'pseudometer/data.py'),
                                   'pseudometer.data.Webpage.get_html_text': ('data.html#webpage.get_html_text', 'pseudometer/data.py'),
-                                  'pseudometer.data.Webpage.most_common_words': ( 'data.html#webpage.most_common_words',
-                                                                                  'pseudometer/data.py')}}}
+                                  'pseudometer.data.Webpage.k_common_words': ('data.html#webpage.k_common_words', 'pseudometer/data.py'),
+                                  'pseudometer.data.get_all_links': ('data.html#get_all_links', 'pseudometer/data.py'),
+                                  'pseudometer.data.get_page_all': ('data.html#get_page_all', 'pseudometer/data.py')}}}
