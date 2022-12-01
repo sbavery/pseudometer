@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['Webpage', 'get_page_all', 'get_all_links']
 
-# %% ../nbs/01_data.ipynb 2
+# %% ../nbs/01_data.ipynb 3
 import warnings
 warnings.filterwarnings('ignore')
 import requests
@@ -16,7 +16,7 @@ from fastai.text.all import *
 import hashlib
 import pickle
 
-# %% ../nbs/01_data.ipynb 6
+# %% ../nbs/01_data.ipynb 7
 class Webpage:
     def __init__(self, url):
         self.url = url
@@ -80,8 +80,7 @@ class Webpage:
                     continue
                 self.text.append(p_text)
 
-    def clean_html_text(self, max_words, enchant_dict="en_US", ignore=[], min_word_len=2):
-        rx = "[^a-zA-Z0-9 ]+"
+    def clean_html_text(self, max_words, enchant_dict="en_US", ignore=[], rx="[^a-zA-Z ]+", min_word_len=2):
         all_text = ' '.join(self.text).lower()
         regex_text = re.sub(rx,'',all_text).strip()
         split = regex_text.split()
@@ -89,13 +88,13 @@ class Webpage:
         if enchant_dict != "": d = enchant.Dict(enchant_dict)
         for word in split:
             if len(self.cleaned_text) >= max_words: break
-            if len(word) > min_word_len:
+            if len(word) >= min_word_len:
                 if enchant_dict == "":
                     self.cleaned_text.append(word)
                 elif d.check(word): 
                     self.cleaned_text.append(word)
 
-    def k_common_words(self, k=10, ignore=["the","to","of","and","a","in","on","is","for","by"]):
+    def k_common_words(self, k=10, ignore=[]):
         if self.cleaned_text == "":
             text = self.text
         else:
@@ -109,12 +108,12 @@ class Webpage:
 
     def save_text(self, path, fname):
         file = open(path+fname, 'wb')
-        pickle.dump(self.cleaned_text, file)
+        pickle.dump(self.text, file)
         file.close()
 
     def load_text(self, path, fname):
         file = open(path+fname, 'rb')
-        self.cleaned_text = pickle.load(file)
+        self.text = pickle.load(file)
         file.close()
 
     def save_links(self, path, fname):
@@ -127,8 +126,8 @@ class Webpage:
         self.links = pickle.load(file)
         file.close()
 
-# %% ../nbs/01_data.ipynb 12
-def get_page_all(url, k, max_words, ignore_words, path = None):
+# %% ../nbs/01_data.ipynb 13
+def get_page_all(url, k, max_words, ignore_text, ignore_common, path = None):
     page = Webpage(url)
     fname_text = page.hash+'.text'
     fname_links = page.hash+'.links'
@@ -136,14 +135,12 @@ def get_page_all(url, k, max_words, ignore_words, path = None):
         page.get_page_html()
         page.get_html_text(tags=["p","h1","h2","h3","span"])
         page.get_html_anchors()
-        page.clean_html_text(max_words, ignore=english_words[:50])
     else:
         if os.path.isfile(path+fname_text): 
             page.load_text(path, fname_text)
         else:
             page.get_page_html()
             page.get_html_text(tags=["p","h1","h2","h3","span"])
-            page.clean_html_text(max_words, ignore=english_words[:50])
             page.save_text(path, fname_text)
 
         if os.path.isfile(path+fname_links): 
@@ -153,25 +150,33 @@ def get_page_all(url, k, max_words, ignore_words, path = None):
             page.get_html_anchors()
             page.save_links(path, fname_links)
 
-    if page.cleaned_text is not None:
-        page.k_common_words(k=k, ignore=ignore_words)
+    if page.text is not None:
+        page.clean_html_text(max_words, ignore=ignore_text, rx="[^a-zA-Z ]+")
+        page.k_common_words(k=k, ignore=ignore_common)
     return page
 
-def get_all_links(url, dict, k, min_words=20, max_words=500, ignore_words=[], ignore_filenames=[".mp3",".jpg",".png"], max_links="", path=None):
-    page = get_page_all(url, k, max_words, ignore_words, path)
-    if page.cleaned_text is not []:
-        dict[url] = [page.cleaned_text, page.most_common_words]
-        print(url,"Contains",len(page.links),"Links")
-        if max_links == "" or max_links > len(page.links): max_links=len(page.links)
+def get_all_links(url, dict, k, min_words=20, max_words=500, ignore_text=[], ignore_common=[], ignore_filenames=[".mp3",".jpg",".png"], max_links="", path=None):
+    primary_page = get_page_all(url, k, max_words, ignore_text, ignore_common, path)
+    if primary_page.cleaned_text is not []:
+        dict[url] = [primary_page.cleaned_text, primary_page.most_common_words]
+        if max_links == "" or max_links > len(primary_page.links): max_links=len(primary_page.links)
         
-        for link in page.links[:max_links]:
+        for count, link in enumerate(primary_page.links[:max_links]):
             if all(x not in link for x in ignore_filenames):
                 try:
-                    page = get_page_all(link, k, max_words, ignore_words, path)
+                    page = get_page_all(link, k, max_words, ignore_text, ignore_common, path)
                     if page.cleaned_text is not []:
                         if len(page.cleaned_text) < min_words: continue
+                        if [page.cleaned_text, page.most_common_words] in dict.values(): continue
                         dict[link] = [page.cleaned_text, page.most_common_words]
                 except:
                     pass
+            if link in dict:
+                res = str(len(dict[link][0]))+" words | "+str(dict[link][1][:3])
+            else:
+                res = "Rejected"
+            progress_message = "%s link %4d/%4d | %s = %s %s" % (url, count, len(primary_page.links), link, res, 200*' ')
+            sys.stdout.write("\r" + progress_message)
+            sys.stdout.flush()
     else:
         print(url,"returned None, Skipping...")
