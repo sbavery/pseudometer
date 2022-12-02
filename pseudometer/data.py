@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['Webpage', 'get_page_all', 'get_all_links']
 
-# %% ../nbs/01_data.ipynb 3
+# %% ../nbs/01_data.ipynb 4
 import warnings
 warnings.filterwarnings('ignore')
 import requests
@@ -16,7 +16,7 @@ from fastai.text.all import *
 import hashlib
 import pickle
 
-# %% ../nbs/01_data.ipynb 7
+# %% ../nbs/01_data.ipynb 8
 class Webpage:
     def __init__(self, url):
         self.url = url
@@ -126,7 +126,7 @@ class Webpage:
         self.links = pickle.load(file)
         file.close()
 
-# %% ../nbs/01_data.ipynb 13
+# %% ../nbs/01_data.ipynb 14
 def get_page_all(url, k, max_words, ignore_text, ignore_common, path = None):
     page = Webpage(url)
     fname_text = page.hash+'.text'

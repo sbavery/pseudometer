@@ -10,9 +10,9 @@ machine learning models.
 ## Install
 
 ``` sh
-pip install pseudometer
+pip install -e .
 ```
 
 ## How to use
 
-TODO
+TODO - Please check out nbs/01_data.ipynb for a full prototype!
