@@ -9,6 +9,19 @@ machine learning models.
 
 ## Install
 
+First, you’ll need the Pyenchant dictionary libraries used to ensure
+collected words are valid.
+
+In linux, run:
+
+``` sh
+sudo apt-get install libenchant-dev
+```
+
+For other OS, see: https://pyenchant.github.io/pyenchant/install.html
+
+Then, in the pseudometer repository run:
+
 ``` sh
 pip install -e .
 ```
