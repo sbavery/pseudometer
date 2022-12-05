@@ -126,7 +126,7 @@ class Webpage:
         self.links = pickle.load(file)
         file.close()
 
-# %% ../nbs/01_data.ipynb 14
+# %% ../nbs/01_data.ipynb 13
 def get_page_all(url, k, max_words, ignore_text, ignore_common, path = None):
     page = Webpage(url)
     fname_text = page.hash+'.text'
@@ -155,10 +155,10 @@ def get_page_all(url, k, max_words, ignore_text, ignore_common, path = None):
         page.k_common_words(k=k, ignore=ignore_common)
     return page
 
-def get_all_links(url, dict, k, min_words=20, max_words=500, ignore_text=[], ignore_common=[], ignore_filenames=[".mp3",".jpg",".png"], max_links="", path=None):
+def get_all_links(url, dict, category, k, min_words=20, max_words=500, ignore_text=[], ignore_common=[], ignore_filenames=[".mp3",".jpg",".png"], max_links="", path=None):
     primary_page = get_page_all(url, k, max_words, ignore_text, ignore_common, path)
     if primary_page.cleaned_text is not []:
-        dict[url] = [primary_page.cleaned_text, primary_page.most_common_words]
+        dict[url] = [primary_page.cleaned_text, primary_page.most_common_words, category]
         if max_links == "" or max_links > len(primary_page.links): max_links=len(primary_page.links)
         
         for count, link in enumerate(primary_page.links[:max_links]):
@@ -166,9 +166,11 @@ def get_all_links(url, dict, k, min_words=20, max_words=500, ignore_text=[], ign
                 try:
                     page = get_page_all(link, k, max_words, ignore_text, ignore_common, path)
                     if page.cleaned_text is not []:
-                        if len(page.cleaned_text) < min_words: continue
+                        if len(page.cleaned_text) == 0: continue
+                        if len(page.cleaned_text) < min_words: category='unknown'
+                        if len(page.cleaned_text) > max_words: page.cleaned_text = page.cleaned_text[:max_words]
                         if [page.cleaned_text, page.most_common_words] in dict.values(): continue
-                        dict[link] = [page.cleaned_text, page.most_common_words]
+                        dict[link] = [page.cleaned_text, page.most_common_words, category]
                 except:
                     pass
             if link in dict:
